@@ -68,3 +68,104 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+### deploy on GitHub Pages
+
+Note: this feature is available with react-scripts@0.2.0 and higher.
+
+#### Step 1: Add homepage to package.json
+The step below is important!
+
+**If you skip it, your app will not deploy correctly.**
+
+Open your `package.json` and add a `homepage` field for your project:
+
+```bash
+"homepage": "https://myusername.github.io/my-app",
+```
+
+or for a GitHub user page:
+
+```bash
+"homepage": "https://myusername.github.io",
+```
+
+or for a custom domain page:
+
+```bash
+"homepage": "https://mywebsite.com",
+```
+
+Create React App uses the homepage field to determine the root URL in the built HTML file.
+
+#### Step 2: Install `gh-pages` and add `deploy` to `scripts` in `package.json`
+Now, whenever you run `npm run build`, you will see a cheat sheet with instructions on how to deploy to GitHub Pages.
+
+To publish it at https://myusername.github.io/my-app, run:
+
+```bash
+npm install --save gh-pages
+```
+
+Alternatively you may use yarn:
+
+```bash
+yarn add gh-pages
+```
+
+Add the following scripts in your `package.json`:
+
+```bash
+"scripts": {
++   "predeploy": "npm run build",
++   "deploy": "gh-pages -d build",
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+```
+
+The `predeploy` script will run automatically before `deploy` is run.
+
+
+If you are deploying to a GitHub user page instead of a project page you'll need to make one additional modification:
+
+1. Tweak your package.json scripts to push deployments to **master**:
+
+```bash
+"scripts": {
+"predeploy": "npm run build",
+-   "deploy": "gh-pages -d build",
++   "deploy": "gh-pages -b master -d build",
+```
+
+### Step 3: Deploy the site by running `npm run deploy`
+
+Then run:
+
+```bash
+npm run deploy
+```
+
+### Step 4: For a project page, ensure your project’s settings use `gh-pages`
+Finally, make sure GitHub Pages option in your GitHub project settings is set to use the `gh-pages` branch:
+
+gh-pages branch setting
+
+
+### Step 5: Optionally, configure the domain
+
+You can configure a custom domain with GitHub Pages by adding a `CNAME` file to the `public/` folder.
+
+Your CNAME file should look like this:
+
+```bash
+mywebsite.com
+```
+
+----
+create-react-app 的版本在低于 2.0 的时候可以在 package.json 增加 proxy 配置即可
+"proxy":{
+    "/api": {
+      "target": "https://meerfans.github.io/meerFaucet",
+      "ws": true
+    }
+  },
