@@ -24,7 +24,7 @@
 
 .App-header {
   background-color: blueviolet;
-  min-height: 100vh;
+  min-height: 92vh;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -37,18 +37,29 @@
   color: mediumspringgreen;
 }
 
-.qngNode {
+.link {
+  padding: 0 2.5%;
   position: relative;
   text-align: right;
-  font-size: 14px;
+  /*font-size: 12px;*/
   color: blue;
+}
+.hashLink {
+  padding: 4px;
+  text-align: center;
+  font-size: 0.8rem;
+  color: black;
+  background-color: lightyellow;
+  border-radius: 5px;
+  /*border: 1px solid white;*/
 }
 
 .getAddr {
   text-align: center;
+  background-color: lightyellow;
   box-shadow: 0 2px 10px 2px slateblue;
   border-radius:5px;
-  min-width: 22rem;
+  min-width: 24rem;
   font-size: 14px;
   caret-color: red;
   height: 2rem;
@@ -68,12 +79,17 @@
 
 .checkButton {
   font-size: 12px;
-  background: lightgray;
+  color: lightgrey;
+  border-radius: 10px;
+  border: 1px solid darkslateblue;
+  /*box-shadow: 0 2px 10px 2px darkmagenta;*/
+  background: darkviolet;
 }
 
 .checkBalance {
   font-size: 14px;
   color: mediumspringgreen;
+  padding-bottom: 50px;
 }
 
 @media (min-width: 540px) {
@@ -82,3 +98,42 @@
     right: -3rem;
   }
 }
+
+
+
+.content {
+  font-size: 14px;
+  color: blue;
+  /*height: 20px;*/
+  /*!* 为左右留出位置 *!*/
+  /*padding: 0 400px;*/
+}
+.left {
+  text-align: center;
+  background-color: blueviolet;
+  width: 30%;
+  height: 8vh;
+  /* 左浮动让三者在同一行 */
+  float: left;
+  /*margin-left: -100%;*/
+  /* 消除左边间隙 */
+  /*position: relative;*/
+  /*left: -400px;*/
+}
+.middle {
+  background-color: blueviolet;
+  /* 中间自适应 */
+  width: 25%;
+  height: 8vh;
+  float: left;
+}
+.right {
+  text-align: center;
+  color: white;
+  background-color: blueviolet;
+  width: 45%;
+  height: 8vh;
+  float: left;
+  /*margin-right: -400px;*/
+}
+
