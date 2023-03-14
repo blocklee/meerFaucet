@@ -36,14 +36,13 @@ contract Faucet is Owner{
         return manager;
     }
 
-    function requestToken(address account) external{
-        require(msg.sender == manager, "Caller is not manager!");
-        require(address(this).balance >= amountAllowed, "Faucet empty!");
-        require(requestedTimes[account] < 20, "Can't request more than 20 times!");
+
+    function sendFaucet(address account) internal virtual {
+        require(requestedTimes[account] < 20, string(abi.encodePacked(account, " this address has requested 20 times!")));
         // 24小时冷却时间判定
-        require(lastCalled[account] + coolDownPeriod <= block.timestamp, "Cooldown period has not ended");
+        require(lastCalled[account] + coolDownPeriod <= block.timestamp, string(abi.encodePacked(account, "CoolDown period has not ended")));
         // 更新冷却状态
-        lastCalled[msg.sender] = block.timestamp;
+        lastCalled[account] = block.timestamp;
 
         // 发送 token
         payable(account).transfer(amountAllowed);
@@ -52,6 +51,14 @@ contract Faucet is Owner{
         emit SendToken(account, amountAllowed);
     }
 
+    function requestToken(address payable[] memory accountList) public {
+        require(msg.sender == manager, "Caller is not manager!");
+        require(address(this).balance >= amountAllowed, "Faucet empty!");
+        uint256 length = accountList.length;
+        for (uint256 i = 0; i < length; i++) {
+            sendFaucet(accountList[i]);
+        }
+    }
+
     receive() external payable {}
 }
-
