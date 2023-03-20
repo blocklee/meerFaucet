@@ -12,10 +12,11 @@
 /build
 
 # private file
-/src/asset/contract.json
+#/src/asset/contract.json
 /src/asset/manager.json
 /src/asset/otherContracts.json
-/src/asset/readfile.js
+#/src/asset/faucetContract.json
+
 
 # idea
 .idea
