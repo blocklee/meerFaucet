@@ -8,7 +8,7 @@ interface NetworkSelectorProps {
 }
 
 const NetworkSelector: React.FC<NetworkSelectorProps> = ({ onProviderChange }) => {
-    const [selectedNetwork, setSelectedNetwork] = useState('testnet');
+    const [selectedNetwork, setSelectedNetwork] = useState('qng');
 
     function handleNetworkChange(event: React.ChangeEvent<HTMLSelectElement>) {
         const network = event.target.value;
@@ -17,11 +17,11 @@ const NetworkSelector: React.FC<NetworkSelectorProps> = ({ onProviderChange }) =
         // 根据用户的选择，更新 provider
         let providerUrl;
         let preScanHref;
-        if (network === 'testnet') {
+        if (network === 'qng') {
             providerUrl = 'https://meer.testnet.meerfans.club/';
             preScanHref = "https://testnet.qng.meerscan.io/tx/";
-        } else if (network === 'qitsubnet') {
-            providerUrl = 'https://qit.testnet.meerfans.club/';
+        } else if (network === 'amana') {
+            providerUrl = 'https://amana.testnet.meerfans.club/';
             preScanHref = "https://testnet.evm.meerscan.com/tx/";
         }
         const provider = new Web3.providers.HttpProvider(providerUrl);
@@ -32,8 +32,8 @@ const NetworkSelector: React.FC<NetworkSelectorProps> = ({ onProviderChange }) =
     return (
         <div>
             <select value={selectedNetwork} onChange={handleNetworkChange}>
-                <option value="testnet">MeerEVM</option>
-                <option value="qitsubnet">QitSubnet</option>
+                <option value="qng">QNG Testnet</option>
+                <option value="amana">Amana Testnet</option>
             </select>
         </div>
     );
