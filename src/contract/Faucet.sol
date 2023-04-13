@@ -9,7 +9,7 @@ contract Faucet is Owner{
 
     address private manager;
     uint256 public amountAllowed = 1 ether;
-    uint256 public requestLimit = 20;
+    uint256 public requestLimit = 100;
     mapping(address => uint256) public requestedTimes;
     // 设置冷却时间以及记录上次调用时间
     mapping(address => uint) public lastCalled;
@@ -44,6 +44,34 @@ contract Faucet is Owner{
         selfdestruct(payable(msg.sender));
     }
 
+
+    function requestToken(address payable[] memory accountList) public {
+        require(msg.sender == manager, "Caller is not manager!");
+        require(address(this).balance >= amountAllowed, "Faucet empty!");
+        uint256 length = accountList.length;
+        string memory reason = "CoolDown";
+        string memory reason_ = "TimesLimit";
+        for (uint256 i = 0; i < length; i++) {
+            if (lastCalled[accountList[i]] + coolDownPeriod > block.timestamp) {
+                emit SendTokenFailed(accountList[i], reason);
+                continue; // 跳过冷却未结束的地址
+            }
+            if (requestedTimes[accountList[i]] >= requestLimit) {
+                emit SendTokenFailed(accountList[i], reason_);
+                continue; // 跳过请求次数已达到上限的地址
+            }
+            lastCalled[accountList[i]] = block.timestamp;
+            accountList[i].transfer(amountAllowed);
+            requestedTimes[accountList[i]] += 1;
+            emit SendToken(accountList[i], amountAllowed);
+
+        }
+    }
+
+    receive() external payable {}
+}
+
+
 //    function checkRequestCount(address account) public view {
 //        // 领取次数上限判定
 //        require(requestedTimes[account] < requestLimit, string(abi.encodePacked(account, " this address has requested 20 times!")));
@@ -73,29 +101,3 @@ contract Faucet is Owner{
 //            }
 //        }
 //    }
-
-    function requestToken(address payable[] memory accountList) public {
-        require(msg.sender == manager, "Caller is not manager!");
-        require(address(this).balance >= amountAllowed, "Faucet empty!");
-        uint256 length = accountList.length;
-        string memory reason = "CoolDown";
-        string memory reason_ = "TimesLimit";
-        for (uint256 i = 0; i < length; i++) {
-            if (lastCalled[accountList[i]] + coolDownPeriod > block.timestamp) {
-                emit SendTokenFailed(accountList[i], reason);
-                continue; // 跳过冷却未结束的地址
-            }
-            if (requestedTimes[accountList[i]] >= requestLimit) {
-                emit SendTokenFailed(accountList[i], reason_);
-                continue; // 跳过请求次数已达到上限的地址
-            }
-            lastCalled[accountList[i]] = block.timestamp;
-            accountList[i].transfer(amountAllowed);
-            requestedTimes[accountList[i]] += 1;
-            emit SendToken(accountList[i], amountAllowed);
-
-        }
-    }
-
-    receive() external payable {}
-}
