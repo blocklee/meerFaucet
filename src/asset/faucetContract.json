@@ -1,5 +1,6 @@
 {
   "address":"0x01090CbC41805FaD0292a1c83af4eE35f0C38D2a",
+  "manager": "0xac0C5300a0de8D94a02d46eb461fF11C6B8A08d3",
   "abi": [
     {
       "inputs": [

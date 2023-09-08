@@ -9,92 +9,99 @@ export default function MyButton(props) {
     const { web3Provider, preHref } = props;
 
     const [clicked, setClicked] = useState(false);
-    // const [faucetBalance, setFaucetBalance] = useState();
-    // const [showBalance, setShowBalance] = useState(false);
     const [hash, setHash] = useState();
     const [href, setHref] = useState();
     const [showHash, setShowHash] = useState(false);
 
     async function sendMeer() {
-        // const web3 = new Web3('wss://evm-testnet-node.qitmeer.io');
-        // const web3 = new Web3('https://meer.testnet.meerfans.club/');
-        // const web3 = new Web3('https://qit.testnet.meerfans.club/');
         const web3 = new Web3(web3Provider)
 
         const contractAddress = Interface.address;
         const abi = Interface.abi;
         const contract = new web3.eth.Contract(abi,contractAddress);
         const toAddress = document.getElementById("getAddr").value;
-        if (!web3.utils.isAddress(toAddress)) {
-            alert("Please input a valid Ethereum address!")
-        }
-        else {
-            setClicked(!clicked);
-            // 水龙头管理员账户，调用合约，支付gas
-            // const pKey = fs.readFileSync('./asset/account.txt').toString();
-            const pKey = File.key;
-            const manager = web3.eth.accounts.privateKeyToAccount(pKey)
-            // console.log("manager:",manager.address)
+        const currentTimestamp = Date.now();
+        console.log(currentTimestamp)
 
-            // 检查 manager 账户余额，如果小于 0.1，要提示增加手续费了
-            const managerBalance = await web3.eth.getBalance(manager.address);
-            // console.log('managerBalance is',managerBalance)
-            if (managerBalance >= 100000000000000000) {
-                console.log('managerBalance is:', web3.utils.fromWei(managerBalance), 'meer')
+        let addrList = [];
+
+        const checkAddress = async (userAddress) => {
+            // console.log(userAddress+":")
+            // 先判定是否为以太坊地址，然后 冷却时间需要大于 coolDownPeriod 设置的24小时；同时已领取次数要小于20次
+            if (!web3.utils.isAddress(userAddress)) {
+                alert("Please input a valid MEER EVM address!")
             }
             else {
-                console.log("The balance of manager account is less than 0.1 meer, need deposit.")
+                const requestTimes = await contract.methods.requestedTimes(userAddress).call();
+                console.log("requestTimes:"+requestTimes)
+                const lastCalled = await contract.methods.lastCalled(userAddress).call();
+                console.log("lastCalled:"+lastCalled)
+                const coolDownPeriod = await contract.methods.coolDownPeriod().call();
+                console.log("coolDownPeriod:"+coolDownPeriod)
+
+                if ((lastCalled + coolDownPeriod) <= currentTimestamp) {
+                    if (requestTimes < 100) {
+                        // 检查通过了才加入领取队列 toAddress[]
+                        addrList.push(userAddress);
+                        // console.log(addrList);
+                    } else {
+                        alert("This address has requested 100 times!")
+                    }
+                } else {
+                    alert("CoolDown period has not ended!")
+                }
             }
+        }
 
-            // 检查水龙头余额
-            // const faucetBalance = web3.utils.fromWei(await web3.eth.getBalance(contractAddress));
-            // console.log('faucet balance is:', faucetBalance, 'meer')
-            // setFaucetBalance(faucetBalance);
-            // setShowBalance(true);
+        await checkAddress(toAddress);
 
-            // 检查地址是否已经领取超过20次
-            const requestStatus = await contract.methods.requestedTimes(toAddress).call();
-            console.log('request times:',requestStatus)
+        const pKey = File.key;
+        const manager = web3.eth.accounts.privateKeyToAccount(pKey)
+        // console.log("manager:",manager.address)
+        // 检查 manager 账户余额，如果小于 0.1，要提示增加手续费了
+        const managerBalance = await web3.eth.getBalance(manager.address);
+        // console.log('managerBalance is',managerBalance)
+        if (managerBalance >= 100000000000000000) {
+            console.log('managerBalance is:', web3.utils.fromWei(managerBalance), 'meer')
+        }
+        else {
+            console.log("The balance of manager account is less than 0.1 meer, need deposit.")
+        }
 
+        if (addrList.length !== 0) {
+            setClicked(!clicked);
             const gasPrice = await web3.eth.getGasPrice();
-            // const gasPrice = web3.utils.fromWei(_gasPrice,'gwei');
-            console.log('gasPrice:', gasPrice);
+            // console.log(gasPrice);
 
+            // 组装交易
             const tx = {
                 from: manager.address,
                 to: contractAddress,
                 value: '0x0',
-                gasLimit: 100000,
-                gasPrice: 2000000000,
-                // gasPrice: parseInt(gasPrice.toString()) + 1000000000,
-                data: contract.methods.requestToken(toAddress).encodeABI()
-                // data: '0xa037eca9',// 合约方法的 16 进制数据
+                gasLimit: 200000,
+                gasPrice: gasPrice,
+                data: contract.methods.requestToken(addrList).encodeABI()
             }
-            const signedTx = await manager.signTransaction(tx)
+            const signedTx = await manager.signTransaction(tx);
+            // 发送交易触发合约
+            const result = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
+            console.log(result);
 
-            // 只有 requestStatus = false 才能领取，true 表示已领取过了，每个地址只能领取一次
-            if (requestStatus < 20) {
-                console.log(("Transaction pending, please wait a moment!"))
-                const result = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
-                // console.log(result)
-                const transactionHash = result.transactionHash;
+            const transactionHash = result.transactionHash;
 
-                setClicked(false);
-                setHash(transactionHash);
-                // const href = "https://testnet.qng.meerscan.io/tx/" + transactionHash;
-                // const href = "https://testnet.evm.meerscan.com/tx/" + transactionHash;
-                const href = preHref + transactionHash;
-                console.log(href)
-                setHref(href);
-                setShowHash(true);
-                // setFaucetBalance(web3.utils.fromWei(await web3.eth.getBalance(contractAddress)));
-                console.log('to:',toAddress, 'transactionHash:',transactionHash)
-                alert("0.2 MEER(testnet) has been sent to \n\n" + toAddress + "\n\n at transaction \n\n" + transactionHash)
-            }
-            else {
-                alert("Can't request more than 20 times!")
-                setClicked(false);
-            }
+            setClicked(false);
+            setHash(transactionHash);
+
+            const href = preHref + transactionHash;
+            console.log(href)
+            setHref(href);
+            setShowHash(true);
+
+            // console.log('to:',toAddress, 'transactionHash:',transactionHash)
+            alert("0.2 MEER(testnet) has been sent to \n\n" + toAddress + "\n\n at transaction \n\n" + transactionHash)
+
+        } else {
+            console.log("Your address not meet the criteria!")
         }
 
     }
@@ -113,7 +120,7 @@ export default function MyButton(props) {
             {/*未点击 request 按钮时显示check balance button*/}
             <div>
                 {/*{showBalance? <p className={"checkBalance"}>Faucet Balance: {faucetBalance} MEER</p>:<FaucetBalance />}*/}
-                <ContractBalance contractAddress="0x8c065027220a18DB163e685F1ffBf3F6F0437944" web3Provider={web3Provider} />
+                <ContractBalance contractAddress={Interface.address} web3Provider={web3Provider} />
                 {showHash &&
                     <p className={"hashLink"}>hash: <a href={href}>{hash}</a></p>
                 }
