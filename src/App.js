@@ -12,7 +12,7 @@ import MyButton from "./components/MyButton";
 function App() {
 
     const initialProvider = new Web3.providers.HttpProvider('https://meer.testnet.meerfans.club/');
-    const initialHref = "https://testnet.qng.meerscan.io/tx/";
+    const initialHref = "https://testnet-qng.qitmeer.io/tx/";
     const [web3Provider, setWeb3Provider] = useState(initialProvider);
     const [preHref, setPreScanHref] = useState(initialHref);
 
