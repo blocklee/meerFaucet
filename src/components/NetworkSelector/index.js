@@ -19,10 +19,10 @@ const NetworkSelector: React.FC<NetworkSelectorProps> = ({ onProviderChange }) =
         let preScanHref;
         if (network === 'qng') {
             providerUrl = 'https://meer.testnet.meerfans.club/';
-            preScanHref = "https://qng-testnet.meerscan.io/tx/";
+            preScanHref = "https://testnet-qng.qitmeer.io/tx/";
         } else if (network === 'amana') {
             providerUrl = 'https://amana.testnet.meerfans.club/';
-            preScanHref = "https://amana-testnet.meerscan.io/tx/";
+            preScanHref = "https://testnet-amana.qitmeer.io/tx/";
         }
         const provider = new Web3.providers.HttpProvider(providerUrl);
         onProviderChange(provider, preScanHref);
