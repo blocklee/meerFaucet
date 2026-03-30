@@ -13,7 +13,7 @@ contract Faucet is Owner{
     mapping(address => uint256) public requestedTimes;
     // 设置冷却时间以及记录上次调用时间
     mapping(address => uint) public lastCalled;
-    uint public coolDownPeriod = 72 hours;
+    uint public coolDownPeriod = 36 hours;
 
     //  SendToken 事件，记录了每次领取Token的地址和数量
     event SendToken(address indexed receiver, uint256 indexed amount);

@@ -20,8 +20,11 @@ export default function MyButton(props) {
         const abi = Interface.abi;
         const contract = new web3.eth.Contract(abi,contractAddress);
         const toAddress = document.getElementById("getAddr").value;
-        const currentTimestamp = Date.now();
-        console.log(currentTimestamp)
+
+        // 得到的是毫秒级时间戳，合约中的 lastCalled[address]是秒级的
+        const currentTimestampMillis = Date.now();
+        const currentTimestamp = Math.floor(currentTimestampMillis / 1000);
+        console.log("currentTimestamp:"+currentTimestamp)
 
         let addrList = [];
 
@@ -34,12 +37,15 @@ export default function MyButton(props) {
             else {
                 const requestTimes = await contract.methods.requestedTimes(userAddress).call();
                 console.log("requestTimes:"+requestTimes)
-                const lastCalled = await contract.methods.lastCalled(userAddress).call();
+                const lastCalled = Number(await contract.methods.lastCalled(userAddress).call());
                 console.log("lastCalled:"+lastCalled)
-                const coolDownPeriod = await contract.methods.coolDownPeriod().call();
+                const coolDownPeriod = Number(await contract.methods.coolDownPeriod().call());
                 console.log("coolDownPeriod:"+coolDownPeriod)
 
-                if ((lastCalled + coolDownPeriod) <= currentTimestamp) {
+                const coolDownEndTime = lastCalled + coolDownPeriod;
+                console.log("coolDownEndTime",coolDownEndTime);
+
+                if (coolDownEndTime <= currentTimestamp) {
                     if (requestTimes < 100) {
                         // 检查通过了才加入领取队列 toAddress[]
                         addrList.push(userAddress);
@@ -98,7 +104,7 @@ export default function MyButton(props) {
             setShowHash(true);
 
             // console.log('to:',toAddress, 'transactionHash:',transactionHash)
-            alert("0.2 MEER(testnet) has been sent to \n\n" + toAddress + "\n\n at transaction \n\n" + transactionHash)
+            alert("Testnet MEER has been sent to \n\n" + toAddress + "\n\n at transaction \n\n" + transactionHash)
 
         } else {
             console.log("Your address not meet the criteria!")
